@@ -1,0 +1,179 @@
+<html>
+    <head>
+        <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script src="timeago.min.js" type="text/javascript"></script>
+        <script src="https://knockoutjs.com/downloads/knockout-3.4.2.js"></script>
+        <style>
+            body {
+                font-family: "Montserrat"
+            }
+
+            ol {
+                list-style: none;
+                counter-reset: my-awesome-counter;
+                padding-left: 0;
+            }
+
+            ol li {
+                counter-increment: my-awesome-counter;
+            }
+            ol li::before {
+                content: counter(my-awesome-counter);
+                background: #2f8f17;
+                color: white;
+                padding: 0.1em 0.5em;
+                font-weight: bold;
+                font-size: 90%;
+                border-radius: 20px;
+                vertical-align: top;
+            }
+
+            .chip {
+                background: #265785;
+                color: white;
+                padding: 0.1em 0.5em;
+                font-weight: bold;
+                font-size: 90%;
+                border-radius: 20px;
+                vertical-align: top;
+            }
+
+            .encounterId {
+                background: #2f8f17;
+                color: white;
+                padding: 0.1em 0.5em;
+                font-weight: bold;
+                font-size: 90%;
+                border-radius: 20px;
+                vertical-align: top;
+            }
+
+            .box {
+
+                border-radius: 4px;
+                padding: 8px;
+            }
+
+            .patient {
+                background: #dddddd;
+            }
+            * {
+                margin: 0.25em;
+            }
+
+            button {
+                font-size: 12pt;
+                font-family: "Montserrat";
+                border: 1px solid #303030;
+                padding: 0.25em 0.5em;
+                box-shadow: 0 2px 2px #888888;
+            }
+
+
+            .encounters {
+                background: #dff7d9;
+            }
+
+            .review {
+
+            }
+
+            .finishReview {
+                color: white;
+                background: #e45d5d;
+            }
+
+            .checkBox {
+                display: none;
+            }            
+
+            .inReview .checkBox {
+                display: inline;
+            }
+
+            .inReview .notReviewed {
+                text-decoration: line-through;
+                color: #888888;
+            }
+
+            .date {
+                color: #aaaaaa;
+                padding-left: 1em;
+                border-left: 1px solid #aaa;
+            }
+        </style>
+        <script src="app.js"></script>
+    </head>
+    <body>
+        NHS Number: <input data-bind="value: nhsNumber" /> (9658218873, 9658220142)
+        <div data-bind="if: Patient">
+            <div class="box patient">
+                <h2 data-bind="text: Patient().name"></h2>
+                <div data-bind="text: Patient().birthDay"></div>
+                <div>Gender: <span data-bind="text: Patient().gender"></span></div>
+                <div>GP: <span data-bind="text: Patient().gp"></span><a href="#">(show more)</a></div>
+                <button data-bind="visible: !Patient().confirmed(), click: Patient().confirm">Confirm</button>
+            </div>
+        </div>
+
+        <br/>
+        <div data-bind="visible: patientData">
+            <button data-bind="click: startReview, visible: !isReviewing()">Review</button>
+            <button class="finishReview" data-bind="click: finishReview, visible: isReviewing()">Finalize & Create encounter</button>
+        </div>
+
+        <div data-bind="css: { inReview: isReviewing() }">
+            <div data-bind="if: Encounters">
+                <div class="box encounters">
+                    <h2>Encounters</h2>
+                    <ol data-bind="foreach: Encounters">
+                        <li>
+                            <span data-bind="text: name"></span><span class="date" data-bind="text: dateEnd"></span>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+            <div data-bind="if: Allergies">
+                <h2>Allergies</h2>
+                <ul data-bind="foreach: Allergies">
+                    <li data-bind="css: { notReviewed: !reviewed() }">
+                        <input type="checkbox" class="checkbox" data-bind="checked: reviewed" /><span data-bind="text: name"></span><span class="date" data-bind="text: date"></span>
+                    </li>
+                </ul>
+            </div>
+            <div data-bind="if: Conditions">
+                <h2>Conditions</h2>
+                <ul data-bind="foreach: Conditions">
+                    <li data-bind="css: { notReviewed: !reviewed() }">
+                        <input type="checkbox" class="checkbox" data-bind="checked: reviewed" /><span class="encounterId" data-bind="visible: encounterId, text: encounterId"></span><span data-bind="text: name"></span><span class="date" data-bind="text: date"></span>
+                    </li>
+                </ul>
+            </div>
+
+            <div data-bind="if: Procedures">
+                <h2>Procedures</h2>
+                <ul data-bind="foreach: Procedures">
+                    <li data-bind="css: { notReviewed: !reviewed() }">
+                        <input type="checkbox" class="checkbox" data-bind="checked: reviewed" /><span data-bind="text: name"></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div data-bind="visible: patientData">
+            <h2>On Examination</h2>
+            <div data-bind="if: isReviewing()">
+                <div>
+                    <textarea data-bind="textInput: medicalMarkdown" cols="50" rows="10"></textarea>
+                </div>
+            </div>
+            <ul data-bind="foreach: ParsedMedical" style="min-height: 120px">
+                <li>
+                    <span class="chip" data-bind="visible: title, text: title"></span>
+                    <span data-bind="text: value"></span>
+                </li>
+            </ul>
+        </div>
+    </body>
+</html>
