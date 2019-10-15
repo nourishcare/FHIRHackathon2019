@@ -106,74 +106,73 @@
         <script src="app.js"></script>
     </head>
     <body>
-        NHS Number: <input data-bind="value: nhsNumber" /> (9658218873, 9658220142)
-        <div data-bind="if: Patient">
-            <div class="box patient">
-                <h2 data-bind="text: Patient().name"></h2>
-                <div data-bind="text: Patient().birthDay"></div>
-                <div>Gender: <span data-bind="text: Patient().gender"></span></div>
-                <div>GP: <span data-bind="text: Patient().gp"></span><a href="#">(show more)</a></div>
-                <button data-bind="visible: !Patient().confirmed(), click: Patient().confirm">Confirm</button>
-            </div>
-        </div>
 
-        <br/>
-        <div data-bind="visible: patientData">
-            <button data-bind="click: startReview, visible: !isReviewing()">Review</button>
-            <button class="finishReview" data-bind="click: finishReview, visible: isReviewing()">Finalize & Create encounter</button>
+    NHS Number: <input data-bind="value: nhsNumber" /> (9658218873, 9658220142)
+    <br/>Name: <input data-bind="value: name" />
+    <div data-bind="foreach: { data: foundPatients, as: 'person' }">
+        <div class="box patient">
+            <h2 data-bind="text: person.name"></h2>
+            <div data-bind="text: person.birthDay"></div>
+            <div>Gender: <span data-bind="text: person.gender"></span></div>
+            <div>GP: <span data-bind="text: person.gp"></div>
+            <button data-bind="visible: !person.confirmed(), click: person.confirm">Confirm</button>
         </div>
+    </div>
 
-        <div data-bind="css: { inReview: isReviewing() }">
+    
+    <div data-bind="if: Patient">
+        <div class="box patient">
+            <h2 data-bind="text: Patient().name"></h2>
+            <div data-bind="text: Patient().birthDay"></div>
+            <div>Gender: <span data-bind="text: Patient().gender"></span></div>
+        </div>
+    </div>
+
+    <br/>
+        
+    <div">
             <div data-bind="if: Encounters">
                 <div class="box encounters">
                     <h2>Encounters</h2>
                     <ol data-bind="foreach: Encounters">
                         <li>
-                            <span data-bind="text: name"></span><span class="date" data-bind="text: dateEnd"></span>
+                            <span data-bind="text: name"></span><span class="date" data-bind="text: date"></span>
                         </li>
                     </ol>
                 </div>
             </div>
-            <div data-bind="if: Allergies">
-                <h2>Allergies</h2>
-                <ul data-bind="foreach: Allergies">
-                    <li data-bind="css: { notReviewed: !reviewed() }">
-                        <input type="checkbox" class="checkbox" data-bind="checked: reviewed" /><span data-bind="text: name"></span><span class="date" data-bind="text: date"></span>
+            <div data-bind="if: QuestionnaireResponses">
+                <h2>Questionnaire Respones</h2>
+                <ul data-bind="foreach: { data: QuestionnaireResponses, as: 'questionnaireResponse' }">
+                    <li>
+                        Author: <span data-bind="text: questionnaireResponse.author"></span> - Status:  <span data-bind="text: questionnaireResponse.status"></span> - Last Updated: <span class="date" data-bind="text: lastUpdated"></span>
+                    
+                        <ul data-bind="foreach: { data: questionnaireResponse.items, as: 'item' }">
+                            <li>
+                                Question: <span data-bind="text: item.question"></span>
+                                </br>
+                                Answer: <span data-bind="text: item.answer"></span>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </div>
             <div data-bind="if: Conditions">
                 <h2>Conditions</h2>
                 <ul data-bind="foreach: Conditions">
-                    <li data-bind="css: { notReviewed: !reviewed() }">
-                        <input type="checkbox" class="checkbox" data-bind="checked: reviewed" /><span class="encounterId" data-bind="visible: encounterId, text: encounterId"></span><span data-bind="text: name"></span><span class="date" data-bind="text: date"></span>
+                    <li>
+                        <span data-bind="text: condition"></span> - Clinical Status:  <span data-bind="text: clinicalStatus"></span> - Last Updated: <span class="date" data-bind="text: lastUpdated"></span>
                     </li>
                 </ul>
             </div>
-
-            <div data-bind="if: Procedures">
-                <h2>Procedures</h2>
-                <ul data-bind="foreach: Procedures">
-                    <li data-bind="css: { notReviewed: !reviewed() }">
-                        <input type="checkbox" class="checkbox" data-bind="checked: reviewed" /><span data-bind="text: name"></span>
+            <div data-bind="if: Allergies">
+                <h2>Allergies</h2>
+                <ul data-bind="foreach: Allergies">
+                    <li>
+                        <span data-bind="text: name"></span><span class="date" data-bind="text: date"></span>
                     </li>
                 </ul>
             </div>
-        </div>
-
-        <div data-bind="visible: patientData">
-            <h2>On Examination</h2>
-            <div data-bind="if: isReviewing()">
-                <div>
-                    <textarea data-bind="textInput: medicalMarkdown" cols="50" rows="10"></textarea>
-                </div>
-            </div>
-            <ul data-bind="foreach: ParsedMedical" style="min-height: 120px">
-                <li>
-                    <span class="chip" data-bind="visible: title, text: title"></span>
-                    <span data-bind="text: value"></span>
-                </li>
-            </ul>
         </div>
     </body>
 </html>
