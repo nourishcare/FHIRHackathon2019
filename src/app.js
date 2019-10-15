@@ -9,6 +9,7 @@ function ViewModel() {
     
     self.patientData = ko.observable(null);
     self.patientEncounters = ko.observable(null);
+    self.patientQuestionnaireResponse = ko.observable(null);
 
     self.nhsNumber.subscribe(function() {
         reset();
@@ -63,15 +64,20 @@ function ViewModel() {
 
         $.getJSON("https://data.developer.nhs.uk/ccri-fhir/STU3/Patient?_id=" + patientId + "&_revinclude=*", function(data) {
             self.patientData(data);
-        })
+        });
 
         $.getJSON("https://data.developer.nhs.uk/ccri-fhir/STU3/Encounter?patient=" + patientId, function(data) {
             self.patientEncounters(data);
-        })
+        });
+
+        $.getJSON("https://data.developer.nhs.uk/ccri-fhir/STU3/QuestionnaireResponse?patient=" + patientId, function(data) {
+            self.patientQuestionnaireResponse(data);
+        });
     })
 
     self.Encounters = ko.computed(function() {
         if (!(patientEncounters = self.patientEncounters())) return null;
+        if (!patientEncounters["entry"]) return null;
 
         encounters = [];
         console.log(patientEncounters["entry"]);
@@ -98,8 +104,49 @@ function ViewModel() {
         return encounters;
     });
 
+    self.QuestionnaireResponses = ko.computed(function() {
+        if (!(patientQuestionnaireResponse = self.patientQuestionnaireResponse())) return null;
+        if (!patientQuestionnaireResponse["entry"]) return null;
+
+        questionnaireResponses = [];
+
+        for(var entry of patientQuestionnaireResponse["entry"]) {
+            resource = entry["resource"];
+            items = [];
+            resource["item"].forEach(item => {
+                item["item"].forEach(innerItem => {
+                    answer = "";
+                    if (innerItem["answer"]) {
+                        if (innerItem["answer"][0]["valueCoding"]) {
+                            answer = innerItem["answer"][0]["valueCoding"]["display"];
+                        } else {
+                            answer = innerItem["answer"][0]["valueString"];
+                        }
+                    };
+                    qa = {
+                        "question": innerItem["text"],
+                        "answer": answer          
+                    };
+                    
+                    items.push(qa);
+                })
+            });
+
+            questionnaireResponses.push({
+                "id": resource["id"],
+                "status": resource["status"],
+                "author": resource["author"]["display"],
+                "lastUpdated": timeago().format(resource["meta"]["lastUpdated"]),
+                "items": items
+            });
+        }
+
+        return questionnaireResponses;
+    });
+    
     self.Allergies = ko.computed(function() {
         if (!(patientData = self.patientData())) return null;
+        if (!patientData["entry"]) return null;
 
         allergies = [];
 
@@ -110,7 +157,7 @@ function ViewModel() {
                     "id": resource["id"],
                     "name": resource["code"]["coding"][0]["display"],
                     "date": timeago().format(resource["assertedDate"]),
-                    "reviewed": ko.observable(true),
+                    "reviewed": ko.observable(true)
                 });
             }
         }
@@ -147,6 +194,7 @@ function ViewModel() {
         self.patient(null);
         self.patientData(null);
         self.patientEncounters(null);
+        self.patientQuestionnaireResponse(null);
     }
 }
 

@@ -141,10 +141,26 @@
                     </ol>
                 </div>
             </div>
+            <div data-bind="if: QuestionnaireResponses">
+                <h2>Questionnaire Respones</h2>
+                <ul data-bind="foreach: { data: QuestionnaireResponses, as: 'questionnaireResponse' }">
+                    <li>
+                        Author: <span data-bind="text: questionnaireResponse.author"></span> - Status:  <span data-bind="text: questionnaireResponse.status"></span> - Last Updated: <span class="date" data-bind="text: lastUpdated"></span>
+                    
+                        <ul data-bind="foreach: { data: questionnaireResponse.items, as: 'item' }">
+                            <li>
+                                Question: <span data-bind="text: item.question"></span>
+                                </br>
+                                Answer: <span data-bind="text: item.answer"></span>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
             <div data-bind="if: Allergies">
                 <h2>Allergies</h2>
                 <ul data-bind="foreach: Allergies">
-                    <li data-bind="css: { notReviewed: !reviewed() }">
+                    <li>
                         <input type="checkbox" class="checkbox" data-bind="checked: reviewed" /><span data-bind="text: name"></span><span class="date" data-bind="text: date"></span>
                     </li>
                 </ul>
