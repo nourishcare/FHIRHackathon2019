@@ -165,6 +165,14 @@
                     </li>
                 </ul>
             </div>
+            <div data-bind="if: Referrals">
+                <h2>Referrals</h2>
+                <ul data-bind="foreach: Referrals">
+                    <li>
+                        - Type:  <span data-bind="text: type"></span> - Requester:  <span data-bind="text: requester"></span>
+                    </li>
+                </ul>
+            </div>
             <div data-bind="if: Allergies">
                 <h2>Allergies</h2>
                 <ul data-bind="foreach: Allergies">

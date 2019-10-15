@@ -10,6 +10,7 @@ function ViewModel() {
     self.patientData = ko.observable(null);
     self.patientEncounters = ko.observable(null);
     self.patientQuestionnaireResponse = ko.observable(null);
+    self.patientReferral = ko.observable(null);
     self.patientConditionResponse = ko.observable(null);
 
     self.nhsNumber.subscribe(function() {
@@ -73,6 +74,10 @@ function ViewModel() {
 
         $.getJSON("https://data.developer.nhs.uk/ccri-fhir/STU3/QuestionnaireResponse?patient=" + patientId, function(data) {
             self.patientQuestionnaireResponse(data);
+        });
+
+        $.getJSON("https://data.developer.nhs.uk/ccri-fhir/STU3/ReferralRequest?patient=" + patientId, function(data) {
+            self.patientReferral(data);
         });
 
         $.getJSON("https://data.developer.nhs.uk/ccri-fhir/STU3/Condition?patient=" + patientId, function(data) {
@@ -168,6 +173,33 @@ function ViewModel() {
         return conditons;
     });
 
+    self.Referrals = ko.computed(function() {
+        if (!(patientReferral = self.patientReferral())) return null;
+        if (!patientReferral["entry"]) return null;
+
+        referrals = [];
+
+        for(var entry of patientReferral["entry"]) {
+            resource = entry["resource"];
+            type = null
+            requester = null
+            if (resource["type"] && resource["type"]["coding"]) {
+                type =  resource["type"]["coding"][0]["display"] 
+            }
+            if (resource["requester"] && resource["requester"]["agent"]) {
+                requester = resource["requester"]["agent"]["display"]
+            }
+
+            referrals.push({
+                "id": resource["id"],
+                "type": type,
+                "requester": requester
+            });
+        }
+
+        return referrals;
+    });
+
     self.Allergies = ko.computed(function() {
         if (!(patientData = self.patientData())) return null;
         if (!patientData["entry"]) return null;
@@ -218,6 +250,7 @@ function ViewModel() {
         self.patient(null);
         self.patientData(null);
         self.patientEncounters(null);
+        self.patientReferral(null);
         self.patientQuestionnaireResponse(null);
         self.patientConditionResponse(null);
     }
