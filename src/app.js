@@ -14,12 +14,7 @@ function ViewModel() {
         reset();
         // Fetch patient ID here.
         $.getJSON("https://data.developer.nhs.uk/ccri-fhir/STU3/Patient?identifier=" + self.nhsNumber(), function(data) {
-            foundPatients = [];    
-            patientData = data["entry"][0];
-            if (patientData) {
-                foundPatients.push(buildPerson(patientData["resource"]));
-                self.foundPatients(foundPatients);
-            }
+            processPatients(data);
         });
     });    
     
@@ -27,15 +22,19 @@ function ViewModel() {
         reset();
         // Fetch patients by name here.
         $.getJSON("https://data.developer.nhs.uk/ccri-fhir/STU3/Patient?name=" + self.name(), function(data) {
-            foundPatients = [];
-            for(var entry of data["entry"]) {
-                foundPatients.push(buildPerson(entry["resource"]));
-            } 
-            self.foundPatients(foundPatients);
-            
-            console.log(foundPatients)
+            processPatients(data);
         });
     });
+
+    function processPatients(json) {
+        foundPatients = [];
+        for(var entry of json["entry"]) {
+            foundPatients.push(buildPerson(entry["resource"]));
+        } 
+        self.foundPatients(foundPatients);
+        
+        console.log(foundPatients)
+    }
 
     self.Patient = ko.computed(function() {
         if (!(patient = self.patient())) return null;
