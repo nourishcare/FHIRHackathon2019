@@ -10,6 +10,7 @@ function ViewModel() {
     self.patientData = ko.observable(null);
     self.patientEncounters = ko.observable(null);
     self.patientQuestionnaireResponse = ko.observable(null);
+    self.patientConditionResponse = ko.observable(null);
 
     self.nhsNumber.subscribe(function() {
         reset();
@@ -72,6 +73,10 @@ function ViewModel() {
 
         $.getJSON("https://data.developer.nhs.uk/ccri-fhir/STU3/QuestionnaireResponse?patient=" + patientId, function(data) {
             self.patientQuestionnaireResponse(data);
+        });
+
+        $.getJSON("https://data.developer.nhs.uk/ccri-fhir/STU3/Condition?patient=" + patientId, function(data) {
+            self.patientConditionResponse(data);
         });
     })
 
@@ -144,6 +149,25 @@ function ViewModel() {
         return questionnaireResponses;
     });
     
+    self.Conditions = ko.computed(function() {
+        if (!(patientConditionResponse = self.patientConditionResponse())) return null;
+        if (!patientConditionResponse["entry"]) return null;
+
+        conditons = [];
+
+        for(var entry of patientConditionResponse["entry"]) {
+            resource = entry["resource"];
+            conditons.push({
+                "id": resource["id"],
+                "clinicalStatus": resource["clinicalStatus"],
+                "lastUpdated": timeago().format(resource["meta"]["lastUpdated"]),
+                "condition": resource["code"]["text"]
+            });
+        }
+
+        return conditons;
+    });
+
     self.Allergies = ko.computed(function() {
         if (!(patientData = self.patientData())) return null;
         if (!patientData["entry"]) return null;
@@ -195,6 +219,7 @@ function ViewModel() {
         self.patientData(null);
         self.patientEncounters(null);
         self.patientQuestionnaireResponse(null);
+        self.patientConditionResponse(null);
     }
 }
 

@@ -157,11 +157,19 @@
                     </li>
                 </ul>
             </div>
+            <div data-bind="if: Conditions">
+                <h2>Conditions</h2>
+                <ul data-bind="foreach: Conditions">
+                    <li>
+                        <span data-bind="text: condition"></span> - Clinical Status:  <span data-bind="text: clinicalStatus"></span> - Last Updated: <span class="date" data-bind="text: lastUpdated"></span>
+                    </li>
+                </ul>
+            </div>
             <div data-bind="if: Allergies">
                 <h2>Allergies</h2>
                 <ul data-bind="foreach: Allergies">
                     <li>
-                        <input type="checkbox" class="checkbox" data-bind="checked: reviewed" /><span data-bind="text: name"></span><span class="date" data-bind="text: date"></span>
+                        <span data-bind="text: name"></span><span class="date" data-bind="text: date"></span>
                     </li>
                 </ul>
             </div>
